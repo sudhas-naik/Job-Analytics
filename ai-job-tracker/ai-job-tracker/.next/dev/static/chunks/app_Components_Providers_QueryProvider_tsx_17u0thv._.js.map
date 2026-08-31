@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/thejasgs/Documents/personal-project/job-analytics/Job-Analytics/ai-job-tracker/app/Components/Providers/QueryProvider.tsx"],"sourcesContent":["\"use client\";\n\nimport {\n  QueryClient,\n  QueryClientProvider,\n} from \"@tanstack/react-query\";\n\nimport { useState } from \"react\";\n\nexport default function QueryProvider({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  const [queryClient] = useState(\n    () => new QueryClient()\n  );\n\n  return (\n    <QueryClientProvider client={queryClient}>\n      {children}\n    </QueryClientProvider>\n  );\n}"],"names":["QueryProvider","children","queryClient","client"],"mappings":";;;;;AAEA;AAAA;AAKA;;;AAPA;;;AASe,SAASA,cAAc,EACpCC,QAAQ,EAGT;;IACC,MAAM,CAACC,YAAY,GAAG,IAAA,yKAAQ;kCAC5B,IAAM,IAAI,+LAAW;;IAGvB,qBACE,6LAAC,gNAAmB;QAACC,QAAQD;kBAC1BD;;;;;;AAGP;GAdwBD;KAAAA"}}]
+}

@@ -8,6 +8,7 @@ import {
   ClipboardList,
   CalendarDays,
   BarChart3,
+  UserRound,
   Settings,
 } from "lucide-react";
 
@@ -38,6 +39,11 @@ const menuItems = [
     icon: BarChart3,
   },
   {
+    name: "Profile",
+    href: "/Profile",
+    icon: UserRound,
+  },
+  {
     name: "Settings",
     href: "/Settings",
     icon: Settings,
@@ -64,7 +70,7 @@ export default function Sidebar() {
       <nav className="space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const active = pathname.toLowerCase() === item.href.toLowerCase();
+          const active = pathname.toLowerCase().startsWith(item.href.toLowerCase());
 
           return (
             <Link

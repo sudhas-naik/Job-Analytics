@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String        @unique
+  password      String
+  profileImage   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  applications Application[]
+  interviews    Interview[]
+  resumes       Resume[]
+}
+
+model Job {
+  id            String        @id @default(cuid())
+  title         String
+  company       String
+  location      String?
+  jobType       String?
+  salary        String?
+  experience    String?
+  description   String?
+  jobUrl        String?
+  source        String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  applications Application[]
+}
+
+model Application {
+  id            String        @id @default(cuid())
+  userId        String
+  jobId         String
+  status        ApplicationStatus @default(SAVED)
+  appliedDate   DateTime?
+  notes         String?
+  resumeUsed    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job           Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  interviews    Interview[]
+
+  @@unique([userId, jobId])
+}
+
+model Interview {
+  id            String        @id @default(cuid())
+  userId        String
+  applicationId String
+  type          String?
+  scheduledAt   DateTime
+  meetingUrl    String?
+  notes         String?
+  feedback      String?
+  status        InterviewStatus @default(SCHEDULED)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application   Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model Resume {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  fileUrl     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  SCREENING
+  INTERVIEW
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}

@@ -1,8 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { Bell, Search, UserCircle } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function Navbar() {
+  const { data: session } = useSession();
+  const displayName = session?.user?.name || session?.user?.email || "User";
+
   return (
     <header className="fixed left-64 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/80 px-6 backdrop-blur-md">
       <div>
@@ -34,10 +39,15 @@ export default function Navbar() {
           <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-indigo-500" />
         </button>
 
-        <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3">
+        <Link
+          href="/Profile"
+          className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 transition-colors hover:bg-slate-50"
+        >
           <UserCircle size={28} className="text-slate-500" />
-          <span className="text-sm font-medium text-slate-700">User</span>
-        </div>
+          <span className="max-w-40 truncate text-sm font-medium text-slate-700">
+            {displayName}
+          </span>
+        </Link>
       </div>
     </header>
   );
