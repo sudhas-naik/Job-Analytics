@@ -20,6 +20,7 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+    
 
     if (newPassword.length < 8) {
       return NextResponse.json(
