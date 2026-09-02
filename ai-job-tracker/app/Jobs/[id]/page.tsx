@@ -6,7 +6,6 @@ import {
   ExternalLink,
   MapPin,
 } from "lucide-react";
-
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import SaveJobButton from "@/app/Components/Jobs/SaveJobButton";
