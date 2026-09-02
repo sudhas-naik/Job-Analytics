@@ -20,8 +20,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    
-
     if (newPassword.length < 8) {
       return NextResponse.json(
         { message: "New password must be at least 8 characters" },
