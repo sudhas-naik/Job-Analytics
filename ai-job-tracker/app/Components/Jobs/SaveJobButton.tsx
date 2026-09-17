@@ -35,6 +35,7 @@ export default function SaveJobButton({
     setSaved(Boolean(data.saved));
     await queryClient.invalidateQueries({ queryKey: ["jobs"] });
     await queryClient.invalidateQueries({ queryKey: ["applications"] });
+    await queryClient.invalidateQueries({ queryKey: ["analytics"] });
   }
 
   return (

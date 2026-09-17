@@ -51,6 +51,7 @@ export default function ApplyJobButton({
 
     await queryClient.invalidateQueries({ queryKey: ["jobs"] });
     await queryClient.invalidateQueries({ queryKey: ["applications"] });
+    await queryClient.invalidateQueries({ queryKey: ["analytics"] });
 
     const nextId = data.data?.id ?? applicationId;
     if (nextId) {

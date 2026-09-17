@@ -8,7 +8,7 @@ interface JobListProps {
 export default function JobList({ jobs }: JobListProps) {
   if (jobs.length === 0) {
     return (
-      <div className="rounded-xl border bg-white p-10 text-center">
+      <div className="ui-card p-10 text-center">
         <h3 className="font-semibold">
           No jobs found
         </h3>

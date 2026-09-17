@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import BackButton from "@/app/Components/Layout/BackButton";
 
 const emptyForm = {
   title: "",
@@ -47,6 +48,7 @@ export default function JobForm() {
     }
 
     await queryClient.invalidateQueries({ queryKey: ["jobs"] });
+    await queryClient.invalidateQueries({ queryKey: ["analytics"] });
     router.push("/Jobs");
     router.refresh();
   }
@@ -54,7 +56,7 @@ export default function JobForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-200/60"
+      className="space-y-4 ui-card p-6"
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
@@ -181,13 +183,7 @@ export default function JobForm() {
           {saving ? "Saving..." : "Save job"}
         </button>
 
-        <button
-          type="button"
-          onClick={() => router.push("/Jobs")}
-          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Cancel
-        </button>
+        <BackButton href="/Jobs" label="Cancel" className="" />
       </div>
     </form>
   );

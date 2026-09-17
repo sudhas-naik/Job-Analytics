@@ -79,9 +79,13 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const jobId = typeof body.jobId === "string" ? body.jobId : "";
+    const settings = await prisma.userSettings.findUnique({
+      where: { userId: user.id },
+      select: { defaultApplicationStatus: true },
+    });
     const status: ApplicationStatus = isStatus(body.status)
       ? body.status
-      : "APPLIED";
+      : (settings?.defaultApplicationStatus ?? "APPLIED");
     const notes =
       typeof body.notes === "string" ? body.notes.trim() || null : null;
     const resumeUsed =

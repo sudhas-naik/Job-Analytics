@@ -23,7 +23,7 @@ export default function JobSearch({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder="Search jobs or companies..."
-        className="w-full rounded-xl border bg-white py-3 pl-10 pr-4 outline-none transition focus:border-black"
+        className="w-full rounded-xl border border-slate-200 bg-white/90 py-3 pl-10 pr-4 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
       />
     </div>
   );
