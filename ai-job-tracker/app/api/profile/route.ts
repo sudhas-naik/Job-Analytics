@@ -113,3 +113,27 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+export async function DELETE() {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    await prisma.user.delete({
+      where: { id: user.id },
+    });
+
+    return NextResponse.json({
+      message: "Account deleted",
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: "Failed to delete account" },
+      { status: 500 }
+    );
+  }
+}

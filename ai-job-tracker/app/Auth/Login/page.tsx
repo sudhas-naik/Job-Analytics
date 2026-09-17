@@ -2,16 +2,20 @@
 
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [pending, setPending] = useState(false);
+  const [message, setMessage] = useState("");
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    setPending(true);
+    setMessage("");
 
     const result = await signIn("credentials", {
       email,
@@ -19,8 +23,10 @@ export default function LoginPage() {
       redirect: false,
     });
 
+    setPending(false);
+
     if (result?.error) {
-      alert("Invalid email or password");
+      setMessage("Invalid email or password");
       return;
     }
 
@@ -29,38 +35,62 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-xl border bg-white p-6 shadow-sm"
-      >
-        <h1 className="mb-6 text-2xl font-bold">
-          Login
-        </h1>
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-3xl border border-white/20 bg-white/95 p-8 shadow-2xl shadow-indigo-950/30 backdrop-blur"
+    >
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-500">
+        Welcome back
+      </p>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+        Login
+      </h1>
+      <p className="mt-1 text-sm text-slate-500">
+        Continue tracking your job search.
+      </p>
 
+      <label className="mt-6 block">
+        <span className="mb-1.5 block text-sm font-medium text-slate-600">
+          Email
+        </span>
         <input
           type="email"
-          placeholder="Email"
+          required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full rounded-lg border p-3"
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
         />
+      </label>
 
+      <label className="mt-4 block">
+        <span className="mb-1.5 block text-sm font-medium text-slate-600">
+          Password
+        </span>
         <input
           type="password"
-          placeholder="Password"
+          required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full rounded-lg border p-3"
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
         />
+      </label>
 
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-black p-3 text-white"
-        >
-          Login
-        </button>
-      </form>
-    </div>
+      {message ? <p className="mt-3 text-sm text-rose-600">{message}</p> : null}
+
+      <button
+        type="submit"
+        disabled={pending}
+        className="mt-6 w-full rounded-xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-indigo-600 disabled:opacity-60"
+      >
+        {pending ? "Signing in..." : "Login"}
+      </button>
+
+      <p className="mt-4 text-center text-sm text-slate-500">
+        Need an account?{" "}
+        <Link href="/Auth/Register" className="font-medium text-indigo-600 hover:underline">
+          Register
+        </Link>
+      </p>
+    </form>
   );
 }

@@ -48,6 +48,8 @@ export default function ApplicationStatusForm({
     if (response.ok) {
       await queryClient.invalidateQueries({ queryKey: ["applications"] });
       await queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["interviews"] });
+      await queryClient.invalidateQueries({ queryKey: ["analytics"] });
       router.refresh();
     }
   }
