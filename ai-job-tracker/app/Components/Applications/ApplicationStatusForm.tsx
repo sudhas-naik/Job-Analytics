@@ -44,7 +44,6 @@ export default function ApplicationStatusForm({
     const data = await response.json();
     setPending(false);
     setMessage(data.message ?? "");
-
     if (response.ok) {
       await queryClient.invalidateQueries({ queryKey: ["applications"] });
       await queryClient.invalidateQueries({ queryKey: ["jobs"] });
@@ -53,7 +52,6 @@ export default function ApplicationStatusForm({
       router.refresh();
     }
   }
-
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4 border-t border-slate-100 pt-6">
       <label className="block">
@@ -72,7 +70,6 @@ export default function ApplicationStatusForm({
           ))}
         </select>
       </label>
-
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium text-slate-600">
           Notes
@@ -84,9 +81,7 @@ export default function ApplicationStatusForm({
           className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
         />
       </label>
-
       {message ? <p className="text-sm text-slate-500">{message}</p> : null}
-
       <button
         type="submit"
         disabled={pending}

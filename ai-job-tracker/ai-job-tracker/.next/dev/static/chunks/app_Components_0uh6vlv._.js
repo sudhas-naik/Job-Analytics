@@ -133,7 +133,7 @@ function MotionEffects() {
         "aria-hidden": true
     }, void 0, false, {
         fileName: "[project]/app/Components/Effects/MotionEffects.tsx",
-        lineNumber: 90,
+        lineNumber: 78,
         columnNumber: 10
     }, this);
 }

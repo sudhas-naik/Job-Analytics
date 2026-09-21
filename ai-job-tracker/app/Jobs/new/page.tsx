@@ -14,7 +14,7 @@ export default function NewJobPage() {
         </p>
       </div>
 
-      <JobForm />
+      <JobForm key="new" />
     </div>
   );
 }

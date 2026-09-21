@@ -19,10 +19,8 @@ export default function CountUp({
       setDisplay(value);
       return;
     }
-
     const start = performance.now();
     let frame = 0;
-
     const tick = (now: number) => {
       const progress = Math.min(1, (now - start) / duration);
       const eased = 1 - Math.pow(1 - progress, 3);
@@ -31,15 +29,12 @@ export default function CountUp({
         frame = requestAnimationFrame(tick);
       }
     };
-
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, [value, duration]);
-
   const formatted = Number.isInteger(value)
     ? Math.round(display).toString()
     : display.toFixed(1);
-
   return (
     <>
       {formatted}

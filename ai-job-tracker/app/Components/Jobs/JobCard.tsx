@@ -70,6 +70,12 @@ export default function JobCard({ job }: JobCardProps) {
         >
           View Details
         </Link>
+        <Link
+          href={`/Jobs/${job.id}/edit`}
+          className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+        >
+          Edit
+        </Link>
         <SaveJobButton jobId={job.id} saved={Boolean(job.saved)} />
       </div>
     </div>

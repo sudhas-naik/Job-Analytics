@@ -26,11 +26,24 @@ export async function GET(request: NextRequest) {
     }
 
     const status = request.nextUrl.searchParams.get("status");
+    const search = request.nextUrl.searchParams.get("search")?.trim() ?? "";
 
     const interviews = await prisma.interview.findMany({
       where: {
         userId: user.id,
         ...(status && isStatus(status) ? { status } : {}),
+        ...(search
+          ? {
+              application: {
+                job: {
+                  OR: [
+                    { title: { contains: search, mode: "insensitive" } },
+                    { company: { contains: search, mode: "insensitive" } },
+                  ],
+                },
+              },
+            }
+          : {}),
       },
       include: {
         application: {

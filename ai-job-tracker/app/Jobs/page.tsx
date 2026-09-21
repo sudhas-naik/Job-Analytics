@@ -1,33 +1,39 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
 import Link from "next/link";
 
 import JobList from "@/app/Components/Jobs/JobList";
-import JobSearch from "@/app/Components/Jobs/JobSearch";
+import SearchInput from "@/app/Components/Search/SearchInput";
 import BackButton from "@/app/Components/Layout/BackButton";
+import { useListSearch } from "@/app/Hooks/useListSearch";
 import { useJobs } from "@/app/Hooks/useJobs";
 
-export default function JobsPage() {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    const query = new URLSearchParams(window.location.search).get("q");
-    if (query) {
-      setSearch(query);
-      setPage(1);
-    }
-  }, []);
+function JobsPageContent() {
+  const {
+    draft,
+    setDraft,
+    committedQuery,
+    page,
+    setPage,
+    commitQuery,
+    clearQuery,
+  } = useListSearch();
 
   const { data, isLoading, isError } = useJobs({
-    search,
+    search: committedQuery,
     page,
     limit: 9,
   });
 
   const jobs = data?.data ?? [];
   const pagination = data?.pagination;
+
+  useEffect(() => {
+    if (pagination && page > pagination.totalPages) {
+      setPage(pagination.totalPages);
+    }
+  }, [page, pagination, setPage]);
 
   return (
     <div>
@@ -50,12 +56,11 @@ export default function JobsPage() {
       </div>
 
       <div className="mb-6">
-        <JobSearch
-          value={search}
-          onChange={(value) => {
-            setSearch(value);
-            setPage(1);
-          }}
+        <SearchInput
+          value={draft}
+          onChange={setDraft}
+          onSubmit={commitQuery}
+          placeholder="Search jobs or companies..."
         />
       </div>
 
@@ -71,13 +76,25 @@ export default function JobsPage() {
 
       {!isLoading && !isError && (
         <>
-          <JobList jobs={jobs} />
+          {committedQuery ? (
+            <p className="mb-3 text-sm text-slate-400">
+              {pagination?.total ?? jobs.length} result
+              {(pagination?.total ?? jobs.length) === 1 ? "" : "s"} for “
+              {committedQuery}”
+            </p>
+          ) : null}
+
+          <JobList
+            jobs={jobs}
+            search={committedQuery}
+            onClearSearch={clearQuery}
+          />
 
           {pagination && pagination.totalPages > 1 && (
             <div className="mt-8 flex items-center justify-center gap-4">
               <button
                 disabled={page === 1}
-                onClick={() => setPage((current) => current - 1)}
+                onClick={() => setPage(page - 1)}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
@@ -87,7 +104,7 @@ export default function JobsPage() {
               </span>
               <button
                 disabled={page === pagination.totalPages}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={() => setPage(page + 1)}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
@@ -97,5 +114,17 @@ export default function JobsPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-10 text-center text-slate-500">Loading jobs...</div>
+      }
+    >
+      <JobsPageContent />
+    </Suspense>
   );
 }
