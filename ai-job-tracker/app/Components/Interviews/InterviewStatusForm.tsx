@@ -49,7 +49,6 @@ export default function InterviewStatusForm({
     event.preventDefault();
     setPending(true);
     setMessage("");
-
     const response = await fetch(`/api/interviews/${interviewId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -62,11 +61,9 @@ export default function InterviewStatusForm({
         feedback,
       }),
     });
-
     const data = await response.json();
     setPending(false);
     setMessage(data.message ?? "");
-
     if (response.ok) {
       await queryClient.invalidateQueries({ queryKey: ["interviews"] });
       await queryClient.invalidateQueries({ queryKey: ["applications"] });
@@ -74,7 +71,6 @@ export default function InterviewStatusForm({
       router.refresh();
     }
   }
-
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4 border-t border-slate-100 pt-6">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -94,7 +90,6 @@ export default function InterviewStatusForm({
             ))}
           </select>
         </label>
-
         <label className="block">
           <span className="mb-1.5 block text-sm font-medium text-slate-600">
             Type
@@ -107,7 +102,6 @@ export default function InterviewStatusForm({
           />
         </label>
       </div>
-
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium text-slate-600">
           Date and time
@@ -119,7 +113,6 @@ export default function InterviewStatusForm({
           className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
         />
       </label>
-
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium text-slate-600">
           Meeting URL
@@ -131,7 +124,6 @@ export default function InterviewStatusForm({
           className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
         />
       </label>
-
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium text-slate-600">
           Notes
@@ -143,7 +135,6 @@ export default function InterviewStatusForm({
           className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
         />
       </label>
-
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium text-slate-600">
           Feedback
@@ -155,9 +146,7 @@ export default function InterviewStatusForm({
           className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
         />
       </label>
-
       {message ? <p className="text-sm text-slate-500">{message}</p> : null}
-
       <button
         type="submit"
         disabled={pending}

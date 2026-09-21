@@ -1,6 +1,10 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import {
+  isLocalProfileImage,
+  removeLocalProfileImages,
+} from "@/lib/profile-image";
 
 async function getCurrentUser() {
   const session = await auth();
@@ -64,6 +68,10 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const name = typeof body.name === "string" ? body.name.trim() : "";
     const email = typeof body.email === "string" ? body.email.trim() : "";
+    const hasProfileImage = Object.prototype.hasOwnProperty.call(
+      body,
+      "profileImage"
+    );
     const profileImage =
       typeof body.profileImage === "string" ? body.profileImage.trim() : "";
 
@@ -90,7 +98,7 @@ export async function PATCH(request: Request) {
       data: {
         name,
         email,
-        profileImage: profileImage || null,
+        ...(hasProfileImage ? { profileImage: profileImage || null } : {}),
       },
       select: {
         id: true,
@@ -120,6 +128,10 @@ export async function DELETE() {
 
     if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (user.profileImage && isLocalProfileImage(user.profileImage)) {
+      await removeLocalProfileImages(user.id);
     }
 
     await prisma.user.delete({

@@ -1,10 +1,14 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   BriefcaseBusiness,
   CalendarDays,
+  CircleDollarSign,
   ExternalLink,
   MapPin,
+  Pencil,
+  Timer,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
@@ -41,75 +45,115 @@ export default async function JobDetailPage({
     day: "numeric",
     year: "numeric",
   });
+  const companyInitial = job.company?.charAt(0).toUpperCase() ?? "J";
+
+  const details = [
+    job.location
+      ? {
+          title: "Location",
+          value: job.location,
+          icon: <MapPin size={18} />,
+          accent: "bg-indigo-50 text-indigo-600",
+        }
+      : null,
+    job.jobType
+      ? {
+          title: "Job type",
+          value: job.jobType,
+          icon: <BriefcaseBusiness size={18} />,
+          accent: "bg-sky-50 text-sky-600",
+        }
+      : null,
+    {
+      title: "Posted",
+      value: posted,
+      icon: <CalendarDays size={18} />,
+      accent: "bg-slate-100 text-slate-600",
+    },
+    job.salary
+      ? {
+          title: "Salary",
+          value: job.salary,
+          icon: <CircleDollarSign size={18} />,
+          accent: "bg-emerald-50 text-emerald-600",
+        }
+      : null,
+    job.experience
+      ? {
+          title: "Experience",
+          value: job.experience,
+          icon: <Timer size={18} />,
+          accent: "bg-amber-50 text-amber-700",
+        }
+      : null,
+  ].filter(Boolean) as Array<{
+    title: string;
+    value: string;
+    icon: ReactNode;
+    accent: string;
+  }>;
 
   return (
     <div className="space-y-6">
       <div>
         <BackButton href="/Jobs" label="Back to jobs" />
-        <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-              {job.title}
-            </h1>
-            <p className="mt-1 text-sm text-slate-500">{job.company}</p>
+        <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
+          <div className="flex min-w-0 items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-xl font-semibold text-indigo-600">
+              {companyInitial}
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+                {job.title}
+              </h1>
+              <p className="mt-1 text-sm text-slate-500">{job.company}</p>
+              {job.source ? (
+                <span className="mt-3 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+                  {job.source}
+                </span>
+              ) : null}
+            </div>
           </div>
-          {job.source ? (
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-              {job.source}
-            </span>
-          ) : null}
+          <Link
+            href={`/Jobs/${job.id}/edit`}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+          >
+            <Pencil size={14} />
+            Edit
+          </Link>
         </div>
       </div>
 
-      <div className="ui-card p-6">
-        <div className="grid gap-4 sm:grid-cols-2">
-          {job.location ? (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <MapPin size={16} />
-              <span>{job.location}</span>
-            </div>
-          ) : null}
-          {job.jobType ? (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <BriefcaseBusiness size={16} />
-              <span>{job.jobType}</span>
-            </div>
-          ) : null}
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <CalendarDays size={16} />
-            <span>Posted {posted}</span>
-          </div>
-          {job.salary ? (
-            <p className="text-sm font-semibold text-slate-900">{job.salary}</p>
-          ) : null}
+      <div className="ui-card p-6 sm:p-7">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {details.map((item) => (
+            <DetailItem key={item.title} {...item} />
+          ))}
         </div>
 
-        {job.experience ? (
-          <p className="mt-4 text-sm text-slate-500">{job.experience}</p>
-        ) : null}
-
         {job.description ? (
-          <div className="mt-6 border-t border-slate-100 pt-6">
-            <h2 className="text-sm font-semibold text-slate-900">Description</h2>
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+          <div className="mt-7 border-t border-slate-100 pt-7">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Description
+            </h2>
+            <p className="mt-3 max-w-3xl whitespace-pre-wrap text-sm leading-7 text-slate-600">
               {job.description}
             </p>
           </div>
         ) : null}
 
-        {job.jobUrl ? (
-          <a
-            href={job.jobUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-600"
-          >
-            Open listing
-            <ExternalLink size={16} />
-          </a>
-        ) : null}
-
-        <div className="mt-6 flex flex-wrap items-start gap-3">
+        <div className="mt-7 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-6">
+          {job.jobUrl ? (
+            <a
+              href={job.jobUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+            >
+              Open listing
+              <ExternalLink size={16} />
+            </a>
+          ) : null}
           <ApplyJobButton
             jobId={job.id}
             applicationStatus={application?.status ?? null}
@@ -118,6 +162,36 @@ export default async function JobDetailPage({
           <SaveJobButton jobId={job.id} saved={Boolean(application)} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function DetailItem({
+  icon,
+  title,
+  value,
+  accent,
+}: {
+  icon: ReactNode;
+  title: string;
+  value: string;
+  accent: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-4">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          {title}
+        </p>
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${accent}`}
+        >
+          {icon}
+        </span>
+      </div>
+      <p className="mt-3 wrap-break-word text-base font-semibold tracking-tight text-slate-900">
+        {value}
+      </p>
     </div>
   );
 }

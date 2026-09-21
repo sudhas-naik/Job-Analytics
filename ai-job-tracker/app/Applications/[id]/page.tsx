@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { BriefcaseBusiness, CalendarDays, MapPin } from "lucide-react";
-
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/require-user";
 import ApplicationStatusForm from "@/app/Components/Applications/ApplicationStatusForm";

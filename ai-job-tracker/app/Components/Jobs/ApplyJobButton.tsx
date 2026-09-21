@@ -31,7 +31,6 @@ export default function ApplyJobButton({
   async function handleApply() {
     setPending(true);
     setMessage("");
-
     const response = await fetch("/api/applications", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -40,30 +39,24 @@ export default function ApplyJobButton({
         status: "APPLIED",
       }),
     });
-
     const data = await response.json();
     setPending(false);
-
     if (!response.ok && response.status !== 409) {
       setMessage(data.message ?? "Could not create application");
       return;
     }
-
     await queryClient.invalidateQueries({ queryKey: ["jobs"] });
     await queryClient.invalidateQueries({ queryKey: ["applications"] });
     await queryClient.invalidateQueries({ queryKey: ["analytics"] });
-
     const nextId = data.data?.id ?? applicationId;
     if (nextId) {
       router.push(`/Applications/${nextId}`);
       router.refresh();
       return;
     }
-
     router.push("/Applications");
     router.refresh();
   }
-
   if (alreadyTracked && applicationId) {
     return (
       <button
@@ -75,7 +68,6 @@ export default function ApplyJobButton({
       </button>
     );
   }
-
   return (
     <div className="flex flex-col gap-1">
       <button

@@ -1,12 +1,14 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { signOut } from "next-auth/react";
+import { FormEvent, useRef, useState } from "react";
+import { signOut, useSession } from "next-auth/react";
 import {
   Briefcase,
   CalendarDays,
+  Camera,
   FileText,
   LogOut,
+  Trash2,
 } from "lucide-react";
 import BackButton from "@/app/Components/Layout/BackButton";
 
@@ -41,10 +43,14 @@ export default function ProfileForm({
   user: ProfileUser;
   stats: ProfileStats;
 }) {
+  const { update } = useSession();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(user.name ?? "");
   const [email, setEmail] = useState(user.email);
   const [profileImage, setProfileImage] = useState(user.profileImage ?? "");
+  const [imageBroken, setImageBroken] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
 
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -62,7 +68,7 @@ export default function ProfileForm({
     const response = await fetch("/api/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, profileImage }),
+      body: JSON.stringify({ name, email }),
     });
 
     const data = await response.json();
@@ -72,7 +78,60 @@ export default function ProfileForm({
     if (response.ok) {
       setName(data.user.name ?? "");
       setEmail(data.user.email);
+      await update({ name: data.user.name ?? "" });
+    }
+  }
+
+  async function handlePhotoUpload(file: File) {
+    if (file.size > 2 * 1024 * 1024) {
+      setProfileMessage("Image must be 2MB or smaller");
+      return;
+    }
+
+    setUploading(true);
+    setProfileMessage("");
+
+    const body = new FormData();
+    body.set("file", file);
+
+    const response = await fetch("/api/profile/image", {
+      method: "POST",
+      body,
+    });
+
+    const data = await response.json();
+    setUploading(false);
+    setProfileMessage(data.message);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    if (response.ok) {
       setProfileImage(data.user.profileImage ?? "");
+      setImageBroken(false);
+      await update({ image: data.user.profileImage });
+    }
+  }
+
+  async function handleRemovePhoto() {
+    setUploading(true);
+    setProfileMessage("");
+
+    const response = await fetch("/api/profile/image", {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+    setUploading(false);
+    setProfileMessage(data.message);
+
+    if (response.ok) {
+      setProfileImage("");
+      setImageBroken(false);
+      await update({ image: null });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   }
 
@@ -138,23 +197,71 @@ export default function ProfileForm({
 
       <div className="ui-card p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          {profileImage ? (
-            <img
-              src={profileImage}
-              alt={name || email}
-              className="h-16 w-16 rounded-2xl object-cover"
-            />
-          ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500 text-lg font-semibold text-white">
-              {initials(name, email)}
-            </div>
-          )}
-          <div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:opacity-60"
+            aria-label="Upload profile photo"
+          >
+            {profileImage && !imageBroken ? (
+              <img
+                src={profileImage}
+                alt={name || email}
+                className="h-full w-full object-cover"
+                onError={() => setImageBroken(true)}
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-indigo-500 text-lg font-semibold text-white">
+                {initials(name, email)}
+              </div>
+            )}
+            <span className="absolute inset-x-0 bottom-0 flex items-center justify-center bg-slate-950/70 py-1 text-white">
+              <Camera size={14} />
+            </span>
+          </button>
+          <div className="min-w-0">
             <h2 className="text-lg font-semibold text-slate-900">
               {name || "Your profile"}
             </h2>
             <p className="text-sm text-slate-500">{email}</p>
             <p className="mt-1 text-xs text-slate-400">Joined {joined}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="rounded-xl bg-slate-950 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
+              >
+                {uploading ? "Uploading..." : "Upload photo"}
+              </button>
+              {profileImage ? (
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  disabled={uploading}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-60"
+                >
+                  <Trash2 size={14} />
+                  Remove
+                </button>
+              ) : null}
+            </div>
+            <p className="mt-2 text-xs text-slate-400">
+              JPG, PNG, WEBP, or GIF · up to 2MB
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                  void handlePhotoUpload(file);
+                }
+              }}
+            />
           </div>
         </div>
       </div>
@@ -233,19 +340,6 @@ export default function ProfileForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
-          />
-        </label>
-
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-medium text-slate-600">
-            Profile image URL
-          </span>
-          <input
-            type="url"
-            value={profileImage}
-            onChange={(e) => setProfileImage(e.target.value)}
-            placeholder="https://..."
-            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
           />
         </label>
 

@@ -1,7 +1,5 @@
 "use client";
-
-import { useQuery } from "@tanstack/react-query";
-
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { JobsResponse } from "@/app/Types/job";
 
 interface UseJobsParams {
@@ -48,5 +46,6 @@ export function useJobs({
         page,
         limit,
       }),
+    placeholderData: keepPreviousData,
   });
 }

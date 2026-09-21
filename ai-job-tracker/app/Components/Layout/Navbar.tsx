@@ -1,21 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Search, UserCircle } from "lucide-react";
+import { Bell, UserCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import SearchInput from "@/app/Components/Search/SearchInput";
+import {
+  isListSearchPage,
+  listSearchHref,
+  listSearchPath,
+  searchPlaceholder,
+} from "@/lib/search";
 
 export default function Navbar() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [query, setQuery] = useState("");
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const urlQuery = isListSearchPage(pathname) ? (searchParams.get("q") ?? "") : "";
+  const [query, setQuery] = useState(urlQuery);
   const displayName = session?.user?.name || session?.user?.email || "User";
 
-  function handleSearch(event: FormEvent) {
-    event.preventDefault();
-    const next = query.trim();
-    router.push(next ? `/Jobs?q=${encodeURIComponent(next)}` : "/Jobs");
+  useEffect(() => {
+    if (!isListSearchPage(pathname)) {
+      return;
+    }
+
+    setQuery(searchParams.get("q") ?? "");
+  }, [pathname, searchParams]);
+
+  function applySearch(nextQuery: string) {
+    const next = nextQuery.trim();
+    const dest = listSearchPath(pathname);
+
+    if (isListSearchPage(pathname) && dest === pathname) {
+      router.replace(listSearchHref(pathname, searchParams.toString(), next), {
+        scroll: false,
+      });
+      return;
+    }
+
+    router.push(next ? `${dest}?q=${encodeURIComponent(next)}` : dest);
   }
 
   return (
@@ -28,20 +54,20 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <form onSubmit={handleSearch} className="relative hidden md:block">
-          <Search
-            size={16}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-          <input
-            type="search"
+        <div className="hidden md:block">
+          <SearchInput
+            variant="navbar"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search jobs, companies..."
-            className="h-10 w-64 rounded-full border border-slate-200 bg-white/80 pl-9 pr-4 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:w-72 focus:border-indigo-300 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+            onChange={(value) => {
+              setQuery(value);
+              if (value === "" && isListSearchPage(pathname)) {
+                applySearch("");
+              }
+            }}
+            onSubmit={() => applySearch(query)}
+            placeholder={searchPlaceholder(pathname)}
           />
-        </form>
-
+        </div>
         <Link
           href="/Interviews"
           aria-label="Notifications"
@@ -50,12 +76,19 @@ export default function Navbar() {
           <Bell size={18} />
           <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-indigo-500 shadow-[0_0_0_4px_rgb(99_102_241/0.2)]" />
         </Link>
-
         <Link
           href="/Profile"
           className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 transition-all hover:-translate-y-0.5 hover:shadow-md"
         >
-          <UserCircle size={28} className="text-indigo-500" />
+          {session?.user?.image ? (
+            <img
+              src={session.user.image}
+              alt={displayName}
+              className="h-7 w-7 rounded-full object-cover"
+            />
+          ) : (
+            <UserCircle size={28} className="text-indigo-500" />
+          )}
           <span className="max-w-40 truncate text-sm font-medium text-slate-700">
             {displayName}
           </span>
