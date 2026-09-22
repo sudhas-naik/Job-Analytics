@@ -2,6 +2,11 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const ThreeBackground = dynamic(() => import("./ThreeBackground"), {
+  ssr: false,
+});
 
 export default function MotionEffects() {
   const pathname = usePathname();
@@ -75,5 +80,10 @@ export default function MotionEffects() {
       page.classList.add("page-enter");
     }, [pathname]);
     
-  return <div className="cursor-spot" aria-hidden />;
+  return (
+    <>
+      <ThreeBackground />
+      <div className="cursor-spot" aria-hidden />
+    </>
+  );
 }
