@@ -47,7 +47,6 @@ const POINT_VERTEX = `
   attribute vec3 aColor;
   uniform float uPixelRatio;
   varying vec3 vPointColor;
-
   void main() {
     vPointColor = aColor;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
@@ -58,7 +57,6 @@ const POINT_VERTEX = `
 
 const POINT_FRAGMENT = `
   varying vec3 vPointColor;
-
   void main() {
     vec2 centered = gl_PointCoord - vec2(0.5);
     float dist = length(centered);
