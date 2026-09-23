@@ -26,24 +26,20 @@ export default function Navbar() {
     if (!isListSearchPage(pathname)) {
       return;
     }
-
     setQuery(searchParams.get("q") ?? "");
   }, [pathname, searchParams]);
 
   function applySearch(nextQuery: string) {
     const next = nextQuery.trim();
     const dest = listSearchPath(pathname);
-
     if (isListSearchPage(pathname) && dest === pathname) {
       router.replace(listSearchHref(pathname, searchParams.toString(), next), {
         scroll: false,
       });
       return;
     }
-
     router.push(next ? `${dest}?q=${encodeURIComponent(next)}` : dest);
   }
-
   return (
     <header className="fixed left-64 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-white/60 bg-white/70 px-6 backdrop-blur-xl">
       <div>
@@ -52,7 +48,6 @@ export default function Navbar() {
         </h2>
         <p className="text-xs text-slate-500">Your search at a glance</p>
       </div>
-
       <div className="flex items-center gap-3">
         <div className="hidden md:block">
           <SearchInput
@@ -68,6 +63,7 @@ export default function Navbar() {
             placeholder={searchPlaceholder(pathname)}
           />
         </div>
+
         <Link
           href="/Interviews"
           aria-label="Notifications"
@@ -76,6 +72,7 @@ export default function Navbar() {
           <Bell size={18} />
           <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-indigo-500 shadow-[0_0_0_4px_rgb(99_102_241/0.2)]" />
         </Link>
+        
         <Link
           href="/Profile"
           className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 transition-all hover:-translate-y-0.5 hover:shadow-md"

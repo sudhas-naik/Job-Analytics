@@ -66,7 +66,6 @@ export default function Sidebar() {
           <p className="text-xs text-slate-400">Career Management</p>
         </div>
       </div>
-
       <nav className="space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -91,7 +90,6 @@ export default function Sidebar() {
           );
         })}
       </nav>
-
       <div className="mt-auto rounded-2xl border border-white/10 bg-linear-to-br from-white/10 to-white/5 p-4">
         <p className="text-xs font-medium text-slate-200">Keep going</p>
         <p className="mt-1 text-xs leading-5 text-slate-400">
